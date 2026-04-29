@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.user.vault-organizer.ingest</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>"__VAULT_DIR__/scripts/daily-ingest.sh" --check-recent</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>__PATH__</string>
+        <key>HOME</key>
+        <string>__USER_HOME__</string>
+        <key>TZ</key>
+        <string>__TZ__</string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>3</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>__USER_HOME__/Library/Logs/vault-organizer-ingest.log</string>
+    <key>StandardErrorPath</key>
+    <string>__USER_HOME__/Library/Logs/vault-organizer-ingest.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

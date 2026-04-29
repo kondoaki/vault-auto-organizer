@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# bats temp dirs
+tests/tmp/
+
+# rendered config (per-install secrets/paths)
+scripts/lib/config.sh
+
+# local env (per-machine paths, not committed)
+.env
+
+# editor
+.vscode/
+.idea/

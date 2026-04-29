@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Test stub for the `opencode` CLI. Behavior is controlled by env vars:
+#   OPENCODE_MOCK_MODE=move-inbox-file   → move first file in <wb>/00_Inbox to 05_Archive/
+#   OPENCODE_MOCK_MODE=noop              → do nothing (default)
+#   OPENCODE_MOCK_MODE=fail               → exit 1
+#
+# opencode runs in CWD (no --add-dir flag), so we use $PWD as the workbench.
+# We assert that the locked-down toolset is configured via OPENCODE_CONFIG_DIR.
+set -euo pipefail
+
+[ "${1:-}" = "run" ] || { echo "MOCK FAILURE: expected first arg 'run', got '${1:-}'" >&2; exit 99; }
+shift
+
+# Drain remaining flags; we don't need their values for the mock.
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --dangerously-skip-permissions) shift ;;
+        --model) shift 2 ;;
+        --format) shift 2 ;;
+        *) shift ;;
+    esac
+done
+
+if [ -z "${OPENCODE_CONFIG_DIR:-}" ]; then
+    echo "MOCK FAILURE: OPENCODE_CONFIG_DIR is not set" >&2
+    exit 99
+fi
+if [ ! -f "$OPENCODE_CONFIG_DIR/opencode.json" ]; then
+    echo "MOCK FAILURE: $OPENCODE_CONFIG_DIR/opencode.json not found" >&2
+    exit 99
+fi
+# Locked-down toolset assertions — match the rules shipped in agent-backends/opencode/opencode.json.
+if ! grep -q '"edit": *"deny"' "$OPENCODE_CONFIG_DIR/opencode.json"; then
+    echo "MOCK FAILURE: opencode.json missing 'edit: deny' rule" >&2
+    exit 99
+fi
+if ! grep -q '"webfetch": *"deny"' "$OPENCODE_CONFIG_DIR/opencode.json"; then
+    echo "MOCK FAILURE: opencode.json missing 'webfetch: deny' rule" >&2
+    exit 99
+fi
+
+wb="$PWD"
+
+case "${OPENCODE_MOCK_MODE:-noop}" in
+    move-inbox-file)
+        f=$(find "$wb/00_Inbox" -type f -name '*.md' | head -1)
+        if [ -n "$f" ]; then
+            base=$(basename "$f")
+            mv "$f" "$wb/05_Archive/$base"
+            printf '\n## [test] ingest | moved %s to 05_Archive\n- result: success\n' "$base" \
+                >> "$wb/log.md"
+        fi
+        ;;
+    noop) : ;;
+    fail) exit 1 ;;
+esac

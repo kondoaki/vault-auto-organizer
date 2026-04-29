@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Test stub for the `claude` CLI. Behavior is controlled by env vars:
+#   CLAUDE_MOCK_MODE=move-inbox-file   → move first file in <wb>/00_Inbox to 05_Archive/
+#   CLAUDE_MOCK_MODE=noop              → do nothing
+#   CLAUDE_MOCK_MODE=fail               → exit 1
+#
+# We parse only --add-dir; everything else is consumed and ignored.
+set -euo pipefail
+add_dir=""
+allowed_tools=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --add-dir) add_dir="$2"; shift 2 ;;
+        --allowedTools) allowed_tools="$2"; shift 2 ;;
+        -p) shift 2 ;;
+        *) shift ;;
+    esac
+done
+
+if [ "$allowed_tools" != "Bash,Write,Read" ]; then
+    echo "MOCK FAILURE: expected --allowedTools 'Bash,Write,Read', got '$allowed_tools'" >&2
+    exit 99
+fi
+
+# Backend contract: cwd must equal the workbench (the prompt tells the agent
+# "the Vault is mounted at the current working directory").
+if [ "$PWD" != "$add_dir" ]; then
+    echo "MOCK FAILURE: expected cwd '$add_dir', got '$PWD'" >&2
+    exit 99
+fi
+
+case "${CLAUDE_MOCK_MODE:-noop}" in
+    move-inbox-file)
+        # Move the first file in 00_Inbox to 05_Archive, append to log.md.
+        f=$(find "$add_dir/00_Inbox" -type f -name '*.md' | head -1)
+        if [ -n "$f" ]; then
+            base=$(basename "$f")
+            mv "$f" "$add_dir/05_Archive/$base"
+            printf '\n## [test] ingest | moved %s to 05_Archive\n- result: success\n' "$base" \
+                >> "$add_dir/log.md"
+        fi
+        ;;
+    noop) : ;;
+    fail) exit 1 ;;
+esac
