@@ -9,7 +9,7 @@ See [SPEC.md](SPEC.md) for the design.
 - **Every night at 03:00** — reads `00_Inbox/`, routes each note to its destination (Resources/Projects/Ideas/Archive), runs a fast Lint on touched files, writes a per-night report.
 - **Every Sunday at 03:30** — runs the full 8-item Lint across the entire Vault.
 
-The agent runs inside an isolated git worktree at `~/Workspace/vault-workbench/` (outside iCloud), and its commits are merged back into the Vault via `git merge --no-ff`. Conflicts abort safely.
+The agent runs inside an isolated git worktree at `~/Workspace/vault-workbench/` (outside the Vault, so the agent's edits don't interleave with any sync activity on the Vault itself), and its commits are merged back into the Vault via `git merge --no-ff`. Conflicts abort safely.
 
 ## Requirements
 
@@ -98,8 +98,6 @@ launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.user.vault-organizer
 ```
 
 If you changed a plist template in `templates/plists/` in this repo, re-run `install.sh` first to regenerate the plist, then follow the same bootout → bootstrap sequence above.
-
-You will also need to grant **Full Disk Access** to `/bin/bash` (System Settings → Privacy & Security → Full Disk Access) so the launchd-spawned shell can read/write inside `~/Library/Mobile Documents/...`.
 
 ## Manual smoke test (perform once after first install)
 

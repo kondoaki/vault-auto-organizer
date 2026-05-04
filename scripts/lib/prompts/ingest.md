@@ -1,7 +1,7 @@
 # Daily Ingest — $RUN_DATE (run-id: $RUN_ID)
 
 You are the Vault auto-organizer. The Vault is mounted at the current working
-directory (a git worktree, NOT the iCloud-synced main copy — write here freely).
+directory (a git worktree, NOT the user's main Vault copy — write here freely).
 
 ## Boot sequence (do this first, in order)
 

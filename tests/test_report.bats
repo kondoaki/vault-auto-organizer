@@ -70,3 +70,33 @@ teardown() { rm -rf "$VAULT"; }
     run cat "$VAULT/05_Archive/daily-reports/2026-04-28.md"
     assert_output "AGENT REPORT"
 }
+
+@test "commit_report commits the report but ignores in-flight Inbox edits" {
+    # Simulate the iCloud race: a user/sync-daemon-edited note in 00_Inbox
+    # exists alongside the orchestrator's just-written SKIPPED report. The
+    # orchestrator must commit only its own files and leave the Inbox file
+    # untracked so the next real run picks it up cleanly.
+    printf 'mid-sync content\n' > "$VAULT/00_Inbox/race.md"
+    bash -c '
+      source "'"$REPO_ROOT"'/scripts/lib/report.sh"
+      write_skipped_report 2026-04-28 "vault edited within last 5 minutes"
+      commit_report "skipped daily-2026-04-28"
+    '
+    run git -C "$VAULT" log --oneline --name-only
+    assert_output --partial "05_Archive/daily-reports/2026-04-28-SKIPPED.md"
+    refute_output --partial "00_Inbox/race.md"
+    [ -f "$VAULT/00_Inbox/race.md" ]
+    run git -C "$VAULT" status --porcelain
+    assert_output --partial "00_Inbox/race.md"
+}
+
+@test "commit_report is a no-op when no orchestrator-managed paths are dirty" {
+    printf 'unrelated\n' > "$VAULT/00_Inbox/unrelated.md"
+    head_before=$(git -C "$VAULT" rev-parse HEAD)
+    bash -c '
+      source "'"$REPO_ROOT"'/scripts/lib/report.sh"
+      commit_report "should be a noop"
+    '
+    head_after=$(git -C "$VAULT" rev-parse HEAD)
+    [ "$head_before" = "$head_after" ]
+}

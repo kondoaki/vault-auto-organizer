@@ -9,13 +9,21 @@ source "$__REPORT_LIB_DIR/common.sh"
 unset __REPORT_LIB_DIR
 
 # commit_report <message>
-# Stage everything in $VAULT_DIR and commit with the auto-organizer identity.
-# No-op if the working tree is clean. Used to land report files (success,
-# skipped, agent-failure, conflict) that are written outside the worktree.
+# Stage and commit only the paths the orchestrator itself writes — log
+# rotation outputs and report files. No-op if those paths are clean. Used
+# to land report files (skipped, agent-failure, conflict) outside the
+# worktree.
+#
+# Why not `git add -A`: a SKIPPED or agent-failure commit should record
+# only the orchestrator's own writes. Sweeping up unrelated user/agent
+# edits in 00_Inbox/, 02_Ideas/, etc. under that misleading commit
+# message would hide their actual provenance — those edits belong to the
+# next non-skipped run, captured by worktree-prepare's snapshot.
 commit_report() {
     local message="$1"
-    if [ -n "$(git -C "$VAULT_DIR" status --porcelain)" ]; then
-        git -C "$VAULT_DIR" add -A
+    local paths=(log.md 05_Archive/logs 05_Archive/daily-reports 05_Archive/lint-reports)
+    if [ -n "$(git -C "$VAULT_DIR" status --porcelain -- "${paths[@]}" 2>/dev/null)" ]; then
+        git -C "$VAULT_DIR" add -- "${paths[@]}"
         git -C "$VAULT_DIR" \
             -c user.email="auto-organizer@local" \
             -c user.name="auto-organizer" \

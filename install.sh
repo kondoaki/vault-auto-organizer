@@ -17,7 +17,7 @@ usage() {
     cat <<EOF
 Usage: install.sh [<vault-dir>] [--backend claude|opencode] [--workbench-dir DIR] [--no-launchd-bootstrap]
 
-  <vault-dir>             Absolute path to the Obsidian Vault (iCloud-synced).
+  <vault-dir>             Absolute path to the Obsidian Vault.
                           Falls back to \$VAULT_PATH (e.g. set in .env) if omitted.
   --backend NAME          Agent CLI backend: claude (default) or opencode.
   --workbench-dir DIR     Worktree location. Default: \$HOME/Workspace/vault-workbench

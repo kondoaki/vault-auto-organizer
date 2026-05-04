@@ -52,6 +52,36 @@ teardown() {
     assert_failure
 }
 
+@test "skip-if-recent ignores recent changes inside .obsidian/" {
+    # Obsidian rewrites .obsidian/workspace.json continuously while open;
+    # treating that as "user editing" would make the daily run never proceed.
+    mkdir -p "$VAULT/.obsidian"
+    echo "{}" > "$VAULT/.obsidian/workspace.json"
+    find "$VAULT" -mindepth 1 -not -path "*/.git/*" -not -path "*/.obsidian/*" \
+        -exec touch -t 202001010000 {} \; 2>/dev/null || true
+    run bash "$REPO_ROOT/scripts/lib/skip-if-recent.sh"
+    assert_failure
+}
+
+@test "skip-if-recent ignores recent changes to CLAUDE.md" {
+    # CLAUDE.md is rewritten by install.sh; users don't edit it directly.
+    echo "fresh" > "$VAULT/CLAUDE.md"
+    find "$VAULT" -mindepth 1 -not -path "*/.git/*" -not -name CLAUDE.md \
+        -exec touch -t 202001010000 {} \; 2>/dev/null || true
+    run bash "$REPO_ROOT/scripts/lib/skip-if-recent.sh"
+    assert_failure
+}
+
+@test "skip-if-recent ignores recent changes to log.md" {
+    # log.md is orchestrator-written (every append_log + rotate_log_if_needed).
+    # If it triggered the recency check, every run would skip the next run.
+    echo "fresh entry" > "$VAULT/log.md"
+    find "$VAULT" -mindepth 1 -not -path "*/.git/*" -not -name log.md \
+        -exec touch -t 202001010000 {} \; 2>/dev/null || true
+    run bash "$REPO_ROOT/scripts/lib/skip-if-recent.sh"
+    assert_failure
+}
+
 @test "skip-if-recent honors trailing slash in VAULT_DIR" {
     find "$VAULT" -mindepth 1 -exec touch -t 202001010000 {} \; 2>/dev/null || true
     echo "x" > "$VAULT/.git/recent-edit"

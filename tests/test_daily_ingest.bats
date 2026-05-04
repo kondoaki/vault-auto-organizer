@@ -43,8 +43,15 @@ teardown() {
     [ -f "$VAULT/05_Archive/daily-reports/${today}-SKIPPED.md" ]
     # Worktree was never created.
     [ ! -d "$WB" ]
-    # SKIPPED report was committed.
-    [ -z "$(git -C "$VAULT" status --porcelain)" ]
+    # SKIPPED report was committed (now in HEAD).
+    run git -C "$VAULT" log --oneline --name-only HEAD
+    assert_output --partial "05_Archive/daily-reports/${today}-SKIPPED.md"
+    # The triggering edit is intentionally left untracked: commit_report
+    # narrows its add scope to orchestrator-managed paths so iCloud sync
+    # locks on user-edited notes don't race with the commit. The next
+    # non-skipped run picks it up via worktree-prepare's snapshot.
+    run git -C "$VAULT" status --porcelain
+    assert_output --partial "02_Ideas/just-now.md"
 }
 
 @test "daily-ingest without flag forces run even with recent edits" {
