@@ -38,6 +38,38 @@ generate_run_id() {
     printf '%s-%s\n' "$kind" "$(current_iso_date)"
 }
 
+# sync_with_origin — best-effort fast pull of origin/main into local main
+# before any pre-batch commits. iCloud sync excludes $VAULT_DIR/.git, so
+# commits made on another device only reach this device through origin —
+# without this, the snapshot in worktree-prepare.sh stacks on stale local
+# history and the subsequent push diverges.
+#
+# Network-related failures (no remote, fetch error, missing origin/main)
+# are best-effort: logged and skipped so an offline run still proceeds.
+# --ff-only is deliberate — it preserves unpushed local commits from a
+# previous run. True divergence (local and origin both moved from the
+# common ancestor) is fatal: continuing would add commits on top of
+# diverged state and the trailing push would be rejected anyway, so we
+# stop now and let a human rebase/merge before the next run.
+sync_with_origin() {
+    if ! git -C "$VAULT_DIR" remote get-url origin >/dev/null 2>&1; then
+        log_info "no origin remote configured; skipping pre-run sync"
+        return 0
+    fi
+    if ! git -C "$VAULT_DIR" fetch origin >&2; then
+        log_error "git fetch origin failed; proceeding with local state"
+        return 0
+    fi
+    if ! git -C "$VAULT_DIR" rev-parse --verify origin/main >/dev/null 2>&1; then
+        log_info "origin/main not found after fetch; skipping merge"
+        return 0
+    fi
+    if ! git -C "$VAULT_DIR" merge --ff-only origin/main >&2; then
+        die "ff-only merge from origin/main failed: local main has diverged from origin/main. Resolve manually (rebase or merge) before the next run."
+    fi
+    log_info "synced local main to origin/main (ff-only)"
+}
+
 # push_to_main — best-effort push of $VAULT_DIR's current branch.
 # - Returns 0 if no upstream is configured (push is silently skipped).
 # - Returns 0 on push success.

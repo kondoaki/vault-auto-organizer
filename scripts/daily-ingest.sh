@@ -35,6 +35,10 @@ log_info "=== daily-ingest start (run_id=$run_id) ==="
 
 rotate_log_if_needed
 
+# Align local main with origin/main before any commits this run might add
+# (snapshot, skipped report, agent merge). .git is no longer iCloud-synced.
+sync_with_origin
+
 if [ "$CHECK_RECENT" -eq 1 ] && bash "$SCRIPT_DIR/lib/skip-if-recent.sh"; then
     log_info "vault has recent edits — skipping"
     write_skipped_report "$date" "vault edited within last 5 minutes"
