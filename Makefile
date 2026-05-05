@@ -1,19 +1,19 @@
-BATS := tests/lib/bats-core/bin/bats
+PY ?= .venv-dev/bin/python
 
 .PHONY: test test-unit test-integration shellcheck clean
 
-test: test-unit test-integration
+test:
+	$(PY) -m pytest
 
 test-unit:
-	$(BATS) tests/test_skip_if_recent.bats tests/test_log.bats tests/test_report.bats
+	$(PY) -m pytest tests/unit
 
 test-integration:
-	$(BATS) tests/test_worktree_prepare.bats tests/test_worktree_merge.bats \
-	        tests/test_invoke_agent.bats tests/test_daily_ingest.bats \
-	        tests/test_weekly_lint.bats tests/test_install.bats
+	$(PY) -m pytest tests/integration
 
 shellcheck:
-	shellcheck scripts/*.sh scripts/lib/*.sh scripts/lib/agent-backends/*.sh install.sh
+	shellcheck install.sh
 
 clean:
-	rm -rf tests/tmp
+	rm -rf tests/tmp .pytest_cache
+	find . -type d -name __pycache__ -prune -exec rm -rf {} +
