@@ -33,11 +33,15 @@ def tmp_vault(tmp_path: Path) -> Path:
         (vault / sub).mkdir(parents=True, exist_ok=True)
     (vault / "log.md").write_text("")
     for keep_dir in (
+        "00_Inbox",
+        "01_Projects",
+        "02_Ideas",
+        "03_Context/_pending-updates",
+        "04_Resources",
         "05_Archive/logs",
         "05_Archive/daily-reports",
         "05_Archive/lint-reports",
         "05_Archive/orphans",
-        "03_Context/_pending-updates",
     ):
         (vault / keep_dir / ".gitkeep").touch()
 

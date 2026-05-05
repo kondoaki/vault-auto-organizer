@@ -18,6 +18,12 @@ class AgentError(OrganizerError):
 class WorktreeMergeConflict(OrganizerError):
     exit_code = 2
 
+    def __init__(self, run_id: str = "", conflicted_files: list[str] | None = None) -> None:
+        self.run_id = run_id
+        self.conflicted_files = conflicted_files or []
+        suffix = f" on {run_id}" if run_id else ""
+        super().__init__(f"merge conflict{suffix}")
+
 
 class SkipRun(OrganizerError):
     """Signals an early, non-error return from a gate-style feature."""
