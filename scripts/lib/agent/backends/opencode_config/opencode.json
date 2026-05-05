@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/gemma4:26b",
+  "permission": {
+    "edit": "deny",
+    "webfetch": "deny",
+    "bash": "allow"
+  },
+  "tools": {
+    "read": true,
+    "write": true,
+    "bash": true,
+    "edit": false,
+    "glob": true,
+    "grep": true,
+    "webfetch": false
+  }
+}
