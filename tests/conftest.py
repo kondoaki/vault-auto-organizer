@@ -45,13 +45,18 @@ def tmp_vault(tmp_path: Path) -> Path:
     ):
         (vault / keep_dir / ".gitkeep").touch()
 
-    subprocess.run(["git", "init", "-q"], cwd=vault, check=True)
+    subprocess.run(
+        ["git", "-c", "init.defaultBranch=main", "init", "-q"],
+        cwd=vault, check=True,
+    )
     subprocess.run(["git", "add", "-A"], cwd=vault, check=True)
     subprocess.run(
         ["git", "-c", "user.email=test@local", "-c", "user.name=test",
          "commit", "-q", "-m", "initial"],
         cwd=vault, check=True,
     )
+    # Ensure the default branch is exactly 'main' regardless of host git config.
+    subprocess.run(["git", "branch", "-M", "main"], cwd=vault, check=True)
     return vault
 
 
