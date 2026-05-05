@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lib.log import append_log, rotate_log_if_needed
+from lib.common import append_log, rotate_log_if_needed
 
 
 def test_append_log_writes_block(tmp_vault: Path, make_config) -> None:
@@ -57,7 +57,7 @@ def test_rotate_archives_old_months(
         encoding="utf-8",
     )
 
-    monkeypatch.setattr("lib.log.current_month_prefix", lambda: "2026-01")
+    monkeypatch.setattr("lib.common.log.current_month_prefix", lambda: "2026-01")
     rotate_log_if_needed(cfg)
 
     kept = log_path.read_text(encoding="utf-8")

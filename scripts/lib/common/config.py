@@ -15,12 +15,12 @@ class Config:
 
 
 def load(*, check_recent: bool = False) -> Config:
-    """Load runtime config from the install-rendered ``local`` module.
+    """Load runtime config from the install-rendered ``config_local`` module.
 
     Imported lazily so tests can construct ``Config`` directly without
-    depending on the install-time-generated ``local.py``.
+    depending on the install-time-generated ``config_local.py``.
     """
-    from . import local  # noqa: PLC0415 — lazy import is intentional
+    from . import config_local as local  # noqa: PLC0415 — lazy import is intentional
 
     return Config(
         vault_dir=Path(local.VAULT_DIR),

@@ -4,8 +4,7 @@ import os
 import time
 from pathlib import Path
 
-from lib.common import log_info
-from lib.config import Config
+from lib.common import Config, log_info
 
 _EXCLUDED_DIRS = {".git", ".obsidian", "05_Archive", "scripts"}
 _EXCLUDED_FILES = {"log.md", "CLAUDE.md"}

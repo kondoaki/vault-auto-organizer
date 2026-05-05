@@ -5,13 +5,13 @@ import subprocess
 from datetime import datetime
 
 from lib.common import (
+    Config,
     OrganizerError,
     WorktreeMergeConflict,
     current_iso_date,
     log_error,
     log_info,
 )
-from lib.config import Config
 
 
 def prepare_worktree(cfg: Config, run_id: str) -> None:

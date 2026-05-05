@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import subprocess
 
-from lib.common import AgentError
-from lib.config import Config
+from lib.common import AgentError, Config
 
 
 def invoke(cfg: Config, prompt_text: str) -> None:

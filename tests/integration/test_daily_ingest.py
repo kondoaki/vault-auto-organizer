@@ -14,10 +14,10 @@ _CLAUDE_MOCK = _REPO_ROOT / "tests" / "fixtures" / "claude-mock" / "claude"
 
 
 def _inject_local(monkeypatch, **values: str) -> None:
-    fake = types.ModuleType("lib.config.local")
+    fake = types.ModuleType("lib.common.config_local")
     for k, v in values.items():
         setattr(fake, k, v)
-    monkeypatch.setitem(sys.modules, "lib.config.local", fake)
+    monkeypatch.setitem(sys.modules, "lib.common.config_local", fake)
 
 
 @pytest.fixture

@@ -3,8 +3,7 @@ from __future__ import annotations
 import subprocess
 from datetime import datetime
 
-from lib.common import OrganizerError, log_info
-from lib.config import Config
+from lib.common import Config, OrganizerError, log_info
 
 
 def take_snapshot(cfg: Config, *, label: str) -> None:

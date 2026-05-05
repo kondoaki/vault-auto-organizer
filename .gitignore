@@ -2,7 +2,7 @@
 .DS_Store
 
 # rendered config (per-install secrets/paths)
-scripts/lib/config/local.py
+scripts/lib/common/config_local.py
 
 # local env (per-machine paths, not committed)
 .env

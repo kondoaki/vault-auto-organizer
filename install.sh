@@ -3,7 +3,7 @@
 # Installs the auto-organizer into the target Vault. Idempotent.
 #
 # Reads .env (if present) for VAULT_PATH, WORKBENCH_DIR, VENV_DIR.
-# Renders templates/config.py.template into <vault>/scripts/lib/config/local.py
+# Renders templates/config.py.template into <vault>/scripts/lib/common/config_local.py
 # and the plist templates into ~/Library/LaunchAgents/, then rsyncs scripts/
 # into the Vault and creates a Python venv at $VENV_DIR for runtime use.
 set -euo pipefail
@@ -141,7 +141,7 @@ fi
 gi="$VAULT_DIR/.gitignore"
 [ -f "$gi" ] || : > "$gi"
 for entry in ".obsidian/workspace.json" ".obsidian/workspace-mobile.json" \
-             ".obsidian/cache" ".DS_Store" ".trash/" "scripts/lib/config/local.py" \
+             ".obsidian/cache" ".DS_Store" ".trash/" "scripts/lib/common/config_local.py" \
              ".venv/"; do
     grep -qxF "$entry" "$gi" || echo "$entry" >> "$gi"
 done
@@ -149,14 +149,14 @@ done
 # 9. rsync scripts/ — exclude the install-rendered local.py.
 mkdir -p "$VAULT_DIR/scripts"
 rsync -a --delete \
-    --exclude 'lib/config/local.py' \
+    --exclude 'lib/common/config_local.py' \
     --exclude '__pycache__' \
     --exclude '*.pyc' \
     "$REPO_ROOT/scripts/" "$VAULT_DIR/scripts/"
 chmod +x "$VAULT_DIR/scripts/daily_ingest.py" "$VAULT_DIR/scripts/weekly_lint.py"
 
-# 10. Render lib/config/local.py from the template.
-mkdir -p "$VAULT_DIR/scripts/lib/config"
+# 10. Render lib/common/config_local.py from the template.
+mkdir -p "$VAULT_DIR/scripts/lib/common"
 sed \
     -e "s|__VAULT_DIR__|${VAULT_DIR}|g" \
     -e "s|__WORKBENCH_DIR__|${WORKBENCH_DIR}|g" \
@@ -164,7 +164,7 @@ sed \
     -e "s|__BACKEND__|${BACKEND}|g" \
     -e "s|__AGENT_BIN__|${AGENT_BIN}|g" \
     "$REPO_ROOT/templates/config.py.template" \
-    > "$VAULT_DIR/scripts/lib/config/local.py"
+    > "$VAULT_DIR/scripts/lib/common/config_local.py"
 
 # 11. Create the runtime Python venv (outside iCloud).
 mkdir -p "$(dirname "$VENV_DIR")"

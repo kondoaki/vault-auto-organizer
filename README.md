@@ -142,7 +142,7 @@ Tests use synthetic Vaults under `tempfile.TemporaryDirectory()` and per-backend
 
 - `<vault>/03_Context/_routing-rules.md` — tag → destination map. User-editable; agent re-reads it every run.
 - `<vault>/CLAUDE.md` — agent operating manual. Overwritten by `install.sh`. Edit the template at [templates/CLAUDE.md](templates/CLAUDE.md), then re-run install.
-- `<vault>/scripts/lib/config/local.py` — paths (vault, workbench, venv, agent binary). Rendered by `install.sh` from [templates/config.py.template](templates/config.py.template); never edit by hand.
+- `<vault>/scripts/lib/common/config_local.py` — paths (vault, workbench, venv, agent binary). Rendered by `install.sh` from [templates/config.py.template](templates/config.py.template); never edit by hand.
 - `<vault>/scripts/lib/agent/backends/` — both backend modules ship together; the active one is selected by `BACKEND` in `local.py`.
 
 ### opencode model selection

@@ -65,7 +65,7 @@ def make_config(tmp_path: Path):
     """Factory returning a Config bound to a tmp vault. Lets tests inject
     their own paths without touching the install-rendered local.py.
     """
-    from lib.config import Config
+    from lib.common import Config
 
     def _make(vault_dir: Path | None = None, **overrides) -> Config:
         v = vault_dir if vault_dir is not None else tmp_path / "vault"

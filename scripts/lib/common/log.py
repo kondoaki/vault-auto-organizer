@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import re
 
-from lib.common import current_iso_minute, current_month_prefix, log_info
-from lib.config import Config
+from .config import Config
+from .iso_date import current_iso_minute, current_month_prefix
+from .logger import log_info
 
 _LOG_HEADER_RE = re.compile(r"^## \[(\d{4}-\d{2})")
 

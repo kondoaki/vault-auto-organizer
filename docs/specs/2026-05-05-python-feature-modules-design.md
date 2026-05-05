@@ -134,7 +134,7 @@ lib/<name>/
 ## 5. Configuration
 
 - `.env` (bash side, gitignored) is the source of truth: `VAULT_PATH`, `WORKBENCH_DIR`, `VENV_DIR`, backend choice.
-- `install.sh` `sed`-renders `templates/config.py.template` into `scripts/lib/config/local.py` (gitignored).
+- `install.sh` `sed`-renders `templates/config.py.template` into `scripts/lib/common/config_local.py` (gitignored).
 - `lib.config.load(*, check_recent: bool=False) -> Config` is the single entry. `Config` is a `@dataclass(frozen=True)`.
 - Every feature receives `cfg: Config` as an argument.
 
@@ -169,7 +169,7 @@ removed:    --workbench-dir DIR   → moved to .env's WORKBENCH_DIR
 4. Drop `templates/CLAUDE.md`, `routing-rules.md`, `MyContext.md`, `log.md`, `.gitignore` (existing logic preserved).
 5. `rsync -a --delete --exclude 'lib/config/local.py' "$REPO_ROOT/scripts/" "$VAULT_DIR/scripts/"`. **All features are always copied.**
 6. Create venv: `/usr/bin/python3 -m venv "$VENV_DIR"`. `$VENV_DIR` must be **outside iCloud** (default `$HOME/Library/Application Support/vault-organizer/venv`).
-7. `sed`-render `templates/config.py.template` → `scripts/lib/config/local.py`.
+7. `sed`-render `templates/config.py.template` → `scripts/lib/common/config_local.py`.
 8. `sed`-render plist templates → `~/Library/LaunchAgents/`.
 9. Print bootstrap instructions unless `--no-launchd-bootstrap`.
 
@@ -300,7 +300,7 @@ Final repo `.gitignore` after migration (drops `scripts/lib/config.sh`, adds Pyt
 ```
 .env
 .DS_Store
-scripts/lib/config/local.py
+scripts/lib/common/config_local.py
 .venv-dev/
 __pycache__/
 *.pyc
@@ -308,7 +308,7 @@ __pycache__/
 
 The vault-side `.gitignore` (appended by `install.sh`) keeps the existing entries (`.obsidian/...`, `.DS_Store`, `.trash/`) and adds `.venv/` as a safety net in case a runtime venv is ever placed inside the vault.
 
-- Never commit `.env`, `scripts/lib/config/local.py`, or rendered plists.
+- Never commit `.env`, `scripts/lib/common/config_local.py`, or rendered plists.
 - Do not paste real vault paths, note titles, or hostnames into source / tests / commit messages / `templates/CLAUDE.md`.
 - Tests must use `tempfile.TemporaryDirectory()` synthetic vaults.
 - `git push` is not run without explicit user approval, per push.

@@ -5,8 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from lib.common import log_info
-from lib.config import Config
+from lib.common import Config, log_info
 
 _TRACKED_PATHS = (
     "log.md",

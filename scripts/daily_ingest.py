@@ -32,12 +32,12 @@ from lib.common import (  # noqa: E402
     current_iso_date,
     generate_run_id,
     install_signal_handlers,
+    load as load_config,
     log_error,
     log_info,
+    rotate_log_if_needed,
     sync_with_origin,
 )
-from lib.config import load as load_config  # noqa: E402
-from lib.log import rotate_log_if_needed  # noqa: E402
 from lib.push import push_to_main  # noqa: E402
 from lib.report import (  # noqa: E402
     commit_report,

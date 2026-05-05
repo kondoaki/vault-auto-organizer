@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lib.common import OrganizerError, current_iso_date, log_info
-from lib.config import Config
+from lib.common import Config, OrganizerError, current_iso_date, log_info
 
 from .backends import claude as _claude
 from .backends import opencode as _opencode

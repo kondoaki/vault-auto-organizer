@@ -4,8 +4,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from lib.common import AgentError
-from lib.config import Config
+from lib.common import AgentError, Config
 
 _CONFIG_DIR = Path(__file__).parent / "opencode_config"
 

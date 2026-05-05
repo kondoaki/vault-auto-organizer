@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import subprocess
 
-from lib.common import log_error, log_info
-from lib.config import Config
+from lib.common import Config, log_error, log_info
 
 
 def push_to_main(cfg: Config) -> None:
