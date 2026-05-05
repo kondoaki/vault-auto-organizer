@@ -1,5 +1,0 @@
-# Auto-Organizer runtime config. Rendered by install.sh.
-# DO NOT EDIT BY HAND — re-run install.sh to update.
-export VAULT_DIR="__VAULT_DIR__"
-export WORKBENCH_DIR="__WORKBENCH_DIR__"
-export __AGENT_BIN_VAR__="__AGENT_BIN__"

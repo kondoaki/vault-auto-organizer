@@ -1,14 +1,17 @@
 # macOS
 .DS_Store
 
-# bats temp dirs
-tests/tmp/
-
 # rendered config (per-install secrets/paths)
-scripts/lib/config.sh
+scripts/lib/common/config_local.py
 
 # local env (per-machine paths, not committed)
 .env
+
+# python
+.venv-dev/
+__pycache__/
+*.pyc
+.pytest_cache/
 
 # editor
 .vscode/
