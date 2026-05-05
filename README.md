@@ -14,10 +14,13 @@ The agent runs inside an isolated git worktree at `~/Workspace/vault-workbench/`
 ## Requirements
 
 - macOS (uses launchd + osascript)
-- bash 3.2+
-- git
+- Command Line Tools for Xcode — provides `/usr/bin/python3` and `git`
+  (run `xcode-select --install` if missing)
 - An agent CLI on PATH: `claude` (default) or `opencode`
 - `rsync` (system default)
+- Full Disk Access granted to `/usr/bin/python3` so the launchd-spawned
+  process can read/write iCloud-backed files. `install.sh` reminds you
+  at the end of every run.
 
 ## Install
 
@@ -74,7 +77,7 @@ launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.user.vault-organizer.l
 
 ### Updating scripts (re-registration not required)
 
-The scripts that actually run live inside the Vault (`<vault>/scripts/`), not in this repo. After editing `.sh` files under this repo's `scripts/`, sync them into the Vault by re-running install:
+The scripts that actually run live inside the Vault (`<vault>/scripts/`), not in this repo. After editing files under this repo's `scripts/`, sync them into the Vault by re-running install:
 
 ```sh
 ./install.sh --no-launchd-bootstrap
@@ -107,8 +110,10 @@ If you changed a plist template in `templates/plists/` in this repo, re-run `ins
 2. Run the batch immediately (manual invocations skip the 5-minute recency check):
 
    ```sh
-   "$VAULT_PATH/scripts/daily-ingest.sh"
+   "$VENV_DIR/bin/python" "$VAULT_PATH/scripts/daily_ingest.py"
    ```
+
+   `$VENV_DIR` defaults to `$HOME/Library/Application Support/vault-organizer/venv`.
 3. Verify:
    - `test-clip.md` is in `<vault>/Resources/`.
    - `test-idea.md` is in `<vault>/Ideas/` (or appended to a related Ideas note) and the original is in `<vault>/Archive/`.
@@ -135,14 +140,14 @@ Tests use synthetic Vaults under `tempfile.TemporaryDirectory()` and per-backend
 
 ## Configuration
 
-- `<vault>/Context/_routing-rules.md` — tag → destination map. User-editable; agent re-reads it every run.
-- `<vault>/CLAUDE.md` — agent operating manual. Overwritten by `install.sh`. Edit the template at `templates/CLAUDE.md` in this repo, then re-run install.
-- `<vault>/scripts/lib/config.sh` — paths (Vault, workbench, agent binary). Rendered by `install.sh`. Holds `CLAUDE_BIN` or `OPENCODE_BIN` depending on `--backend`.
-- `<vault>/scripts/lib/agent-backends/` — only the chosen backend's snippet (and any backend-specific config like `opencode/opencode.json`).
+- `<vault>/03_Context/_routing-rules.md` — tag → destination map. User-editable; agent re-reads it every run.
+- `<vault>/CLAUDE.md` — agent operating manual. Overwritten by `install.sh`. Edit the template at [templates/CLAUDE.md](templates/CLAUDE.md), then re-run install.
+- `<vault>/scripts/lib/config/local.py` — paths (vault, workbench, venv, agent binary). Rendered by `install.sh` from [templates/config.py.template](templates/config.py.template); never edit by hand.
+- `<vault>/scripts/lib/agent/backends/` — both backend modules ship together; the active one is selected by `BACKEND` in `local.py`.
 
 ### opencode model selection
 
-When `--backend opencode` is used, the model is controlled by the `"model"` key in [scripts/lib/agent-backends/opencode/opencode.json](scripts/lib/agent-backends/opencode/opencode.json) — both in the source repo and in the Vault copy. Default is `ollama/gemma4:26b` (local LLM). Format is `provider/model` per [opencode's model docs](https://opencode.ai/docs/models). To change it, edit the source `opencode.json` in the Vault.
+When `--backend opencode` is used, the model is controlled by the `"model"` key in [scripts/lib/agent/backends/opencode_config/opencode.json](scripts/lib/agent/backends/opencode_config/opencode.json) — both in the source repo and in the Vault copy. Default is `ollama/gemma4:26b` (local LLM). Format is `provider/model` per [opencode's model docs](https://opencode.ai/docs/models). To change it, edit `opencode.json` in this repo and re-run `install.sh`.
 
 ## Troubleshooting
 
