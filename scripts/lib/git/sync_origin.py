@@ -3,8 +3,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from .exceptions import OrganizerError
-from .logger import log_error, log_info
+from lib.common import OrganizerError, log_error, log_info
 
 
 def _git(vault_dir: Path, *args: str, capture: bool = False) -> subprocess.CompletedProcess[bytes]:
@@ -42,3 +41,6 @@ def sync_with_origin(vault_dir: Path) -> None:
         )
 
     log_info("synced local main to origin/main (ff-only)")
+
+
+__all__ = ["sync_with_origin"]

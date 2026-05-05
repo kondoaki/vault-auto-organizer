@@ -18,8 +18,8 @@ def prepare_worktree(cfg: Config, run_id: str) -> None:
     """Create a fresh git worktree at ``cfg.workbench_dir`` on branch ``run_id``.
 
     Removes any stale workbench directory and same-named branch first.
-    The caller is expected to have run ``lib.snapshot.take_snapshot`` so
-    the run starts from a clean ``main``.
+    The caller is expected to have run ``take_snapshot`` so the run starts
+    from a clean ``main``.
     """
     if not (cfg.vault_dir / ".git").exists():
         raise OrganizerError(f"VAULT_DIR is not a git repo: {cfg.vault_dir}")

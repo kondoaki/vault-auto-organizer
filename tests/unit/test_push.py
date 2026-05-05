@@ -3,7 +3,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from lib.push import push_to_main
+from lib.git import push_to_main
 
 
 def test_push_noop_when_no_upstream(tmp_vault: Path, make_config, capsys) -> None:

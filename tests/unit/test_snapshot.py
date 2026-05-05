@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from lib.common import OrganizerError
-from lib.snapshot import take_snapshot
+from lib.git import take_snapshot
 
 
 def _head(vault: Path) -> str:

@@ -8,7 +8,7 @@ import pytest
 
 from lib.agent import invoke_agent
 from lib.common import AgentError, OrganizerError
-from lib.worktree import prepare_worktree
+from lib.git import prepare_worktree
 
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]

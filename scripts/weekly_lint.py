@@ -25,9 +25,15 @@ from lib.common import (  # noqa: E402
     log_error,
     log_info,
     rotate_log_if_needed,
-    sync_with_origin,
 )
-from lib.push import push_to_main  # noqa: E402
+from lib.git import (  # noqa: E402
+    cleanup_worktree,
+    merge_worktree,
+    prepare_worktree,
+    push_to_main,
+    sync_with_origin,
+    take_snapshot,
+)
 from lib.report import (  # noqa: E402
     commit_report,
     write_agent_failure,
@@ -35,12 +41,6 @@ from lib.report import (  # noqa: E402
     write_success,
 )
 from lib.skip_if_recent import is_recent  # noqa: E402
-from lib.snapshot import take_snapshot  # noqa: E402
-from lib.worktree import (  # noqa: E402
-    cleanup_worktree,
-    merge_worktree,
-    prepare_worktree,
-)
 
 
 def main(argv: list[str]) -> int:

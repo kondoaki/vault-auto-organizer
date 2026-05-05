@@ -15,8 +15,8 @@ from lib.common import (
     current_iso_minute,
     current_month_prefix,
     generate_run_id,
-    sync_with_origin,
 )
+from lib.git import sync_with_origin
 
 
 def test_current_iso_date_format() -> None:

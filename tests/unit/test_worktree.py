@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from lib.common import OrganizerError, WorktreeMergeConflict
-from lib.worktree import cleanup_worktree, merge_worktree, prepare_worktree
+from lib.git import cleanup_worktree, merge_worktree, prepare_worktree
 
 
 def _git(vault: Path, *args: str) -> subprocess.CompletedProcess[str]:
