@@ -6,9 +6,9 @@
     <string>com.user.vault-organizer.lint</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/bash</string>
-        <string>-c</string>
-        <string>"__VAULT_DIR__/scripts/weekly-lint.sh" --check-recent</string>
+        <string>__VENV_DIR__/bin/python</string>
+        <string>__VAULT_DIR__/scripts/weekly_lint.py</string>
+        <string>--check-recent</string>
     </array>
     <key>EnvironmentVariables</key>
     <dict>
@@ -18,6 +18,12 @@
         <string>__USER_HOME__</string>
         <key>TZ</key>
         <string>__TZ__</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+        <key>LC_ALL</key>
+        <string>en_US.UTF-8</string>
+        <key>PYTHONUTF8</key>
+        <string>1</string>
     </dict>
     <key>StartCalendarInterval</key>
     <dict>
