@@ -32,13 +32,20 @@ def tmp_vault(tmp_path: Path) -> Path:
     ):
         (vault / sub).mkdir(parents=True, exist_ok=True)
     (vault / "log.md").write_text("")
+    for keep_dir in (
+        "05_Archive/logs",
+        "05_Archive/daily-reports",
+        "05_Archive/lint-reports",
+        "05_Archive/orphans",
+        "03_Context/_pending-updates",
+    ):
+        (vault / keep_dir / ".gitkeep").touch()
 
-    subprocess.run(
-        ["git", "init", "-q"], cwd=vault, check=True
-    )
+    subprocess.run(["git", "init", "-q"], cwd=vault, check=True)
+    subprocess.run(["git", "add", "-A"], cwd=vault, check=True)
     subprocess.run(
         ["git", "-c", "user.email=test@local", "-c", "user.name=test",
-         "commit", "-q", "--allow-empty", "-m", "initial"],
+         "commit", "-q", "-m", "initial"],
         cwd=vault, check=True,
     )
     return vault
