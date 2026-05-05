@@ -14,12 +14,12 @@ def _git(vault_dir: Path, *args: str, capture: bool = False) -> subprocess.Compl
 
 
 def sync_with_origin(vault_dir: Path) -> None:
-    """Best-effort fast-forward of local main from origin/main.
+    """Align local main with origin/main before the run starts.
 
-    Mirrors the bash sync_with_origin: missing remote, fetch failure, or
-    missing origin/main are logged and skipped (offline runs proceed).
-    True divergence (non-fast-forward) is fatal — caller should resolve
-    manually before the next run.
+    Tries ff-only first; on divergence falls back to a mixed
+    ``git reset origin/main``. Assumes the vault content is also kept
+    in sync across devices by an external file syncer (Syncthing /
+    iCloud) — see README §Sync prerequisites.
     """
     if _git(vault_dir, "remote", "get-url", "origin", capture=True).returncode != 0:
         log_info("no origin remote configured; skipping pre-run sync")
@@ -33,14 +33,18 @@ def sync_with_origin(vault_dir: Path) -> None:
         log_info("origin/main not found after fetch; skipping merge")
         return
 
-    if _git(vault_dir, "merge", "--ff-only", "origin/main").returncode != 0:
-        raise OrganizerError(
-            "ff-only merge from origin/main failed: local main has diverged "
-            "from origin/main. Resolve manually (rebase or merge) before the "
-            "next run."
-        )
+    if _git(vault_dir, "merge", "--ff-only", "origin/main").returncode == 0:
+        log_info("synced local main to origin/main (ff-only)")
+        return
 
-    log_info("synced local main to origin/main (ff-only)")
+    # Diverged: mixed reset HEAD to origin/main. The working tree is left
+    # alone — file-sync (Syncthing / iCloud) is expected to keep on-disk
+    # content aligned across devices, so the result ends up clean.
+    if _git(vault_dir, "reset", "origin/main").returncode != 0:
+        raise OrganizerError(
+            "git reset to origin/main failed; resolve manually before the next run."
+        )
+    log_info("local main diverged from origin/main; reset HEAD to origin/main")
 
 
 __all__ = ["sync_with_origin"]

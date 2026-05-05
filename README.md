@@ -22,6 +22,22 @@ The agent runs inside an isolated git worktree at `~/Workspace/vault-workbench/`
   process can read/write iCloud-backed files. `install.sh` reminds you
   at the end of every run.
 
+## Sync prerequisites
+
+This tool assumes the Vault is kept in sync across devices by an external
+file syncer (Syncthing, iCloud Drive, Dropbox, etc.). The orchestrator's
+divergence-recovery in `lib.git.sync_origin` does a mixed
+`git reset origin/main` when local main and `origin/main` diverge — that
+preserves the working tree on the assumption it already matches origin
+via file sync.
+
+**If you do NOT use file sync between devices**, this is unsafe: a mixed
+reset will leave files exclusive to `origin/main` absent from disk, and
+the next snapshot would commit them as deletions. In a single-device
+setup divergence shouldn't normally occur (push happens at the end of
+every run); if it does, swap `lib.git.sync_origin` for a `git pull
+--rebase --autostash` flow, or resolve manually before the next run.
+
 ## Install
 
 First, set your Vault path. Copy `.env.example` to `.env` and edit `VAULT_PATH`:
