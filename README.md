@@ -118,11 +118,20 @@ If you changed a plist template in `templates/plists/` in this repo, re-run `ins
 
 ## Tests
 
+First-time setup of the dev virtualenv (kept separate from the runtime venv that `install.sh` creates):
+
+```sh
+/usr/bin/python3 -m venv .venv-dev
+.venv-dev/bin/pip install -r requirements-dev.txt
+```
+
+Then:
+
 ```sh
 make test
 ```
 
-Tests use a synthetic Vault under `mktemp -d` and per-backend mocks under `tests/fixtures/{claude,opencode}-mock/`. Real agent invocations are exercised only by the manual smoke test above.
+Tests use synthetic Vaults under `tempfile.TemporaryDirectory()` and per-backend mocks under `tests/fixtures/{claude,opencode}-mock/`. Real agent invocations are exercised only by the manual smoke test above.
 
 ## Configuration
 

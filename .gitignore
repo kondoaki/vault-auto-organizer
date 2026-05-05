@@ -6,9 +6,15 @@ tests/tmp/
 
 # rendered config (per-install secrets/paths)
 scripts/lib/config.sh
+scripts/lib/config/local.py
 
 # local env (per-machine paths, not committed)
 .env
+
+# python
+.venv-dev/
+__pycache__/
+*.pyc
 
 # editor
 .vscode/
