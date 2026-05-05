@@ -170,7 +170,11 @@ sed \
 mkdir -p "$(dirname "$VENV_DIR")"
 if [ ! -x "$VENV_DIR/bin/python" ]; then
     echo "[install] creating venv at $VENV_DIR"
-    /usr/bin/python3 -m venv "$VENV_DIR"
+    # --without-pip skips the ensurepip subprocess that would otherwise
+    # spawn a second python via the venv's symlink — macOS TCC treats
+    # that as a distinct invocation path and prompts for FDA again.
+    # Runtime deps are zero, so the venv doesn't need pip.
+    /usr/bin/python3 -m venv --without-pip "$VENV_DIR"
 fi
 
 # 12. Render plists.
