@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -85,6 +86,36 @@ def default_skeleton() -> str:
     )
 
 
+def _expand(path_str: str) -> Path:
+    return Path(os.path.expanduser(path_str)).resolve()
+
+
+def classify_note_state(note_path: Path, *, repo_path: Path) -> str:
+    """Classify the relationship between an existing note and a repo.
+
+    - "new"        : note file does not exist
+    - "adopt"      : note exists but has no project_path frontmatter
+    - "registered" : project_path resolves to repo_path
+    - "mismatch"   : project_path resolves to something else
+    """
+    if not note_path.exists():
+        return "new"
+    parsed = parse_note_text(note_path.read_text(encoding="utf-8"))
+    pp = parsed.frontmatter.get("project_path")
+    if not pp:
+        return "adopt"
+    if _expand(pp) == repo_path.resolve():
+        return "registered"
+    return "mismatch"
+
+
+def should_skip(parsed: ParsedNote, *, head_short: str) -> bool:
+    last = parsed.frontmatter.get("last_synced_commit", "").strip()
+    if not last:
+        return False
+    return last == head_short
+
+
 __all__ = [
     "MARKER_START",
     "MARKER_END",
@@ -95,4 +126,6 @@ __all__ = [
     "has_valid_markers",
     "resolve_note_path",
     "default_skeleton",
+    "classify_note_state",
+    "should_skip",
 ]
