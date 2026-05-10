@@ -351,10 +351,22 @@ When run on a host where a previously-synced repo is *not* present locally, that
 ## 14. Future extensions (out of scope for v1)
 
 - `--discover` mode: list `~/Projects/*` repositories that have no Vault note, without writing.
-- Ignore patterns: `~/.config/vault-auto-organizer/project-sync-ignore` glob list to exclude specific subdirectories from bulk mode.
 - Reverse direction (Idea → scaffolded `~/Projects/<name>/`): separate spec, will reuse `project_path` / `project_repo` frontmatter as input.
 - Active-Projects line maintenance in `MyContext.md`.
 - Cross-machine "missing on this host" reporting.
+
+### Implemented in v1: `PROJECT_SYNC_IGNORE`
+
+Colon-separated repo basenames in the env var skip those repos in **bulk
+mode only** (single-target invocation always wins, so the user can still
+force-sync an ignored repo by passing its path explicitly). Globs are not
+supported; matches are exact basename. Example:
+
+```
+PROJECT_SYNC_IGNORE=scratch:dotfiles project_sync.py ~/Projects/
+```
+
+Output line: `skipped    <name> (ignored via PROJECT_SYNC_IGNORE)`.
 
 ## 15. Open questions / assumptions
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -10,6 +11,15 @@ from lib.common import Config, OrganizerError, log_error, log_info
 from . import discover as discover_mod
 from .sync import SyncResult, sync_repo
 
+_IGNORE_ENV = "PROJECT_SYNC_IGNORE"
+
+
+def _parse_ignore_list(raw: str):
+    """Parse PROJECT_SYNC_IGNORE: colon-separated repo basenames, like PATH."""
+    if not raw:
+        return set()
+    return {part.strip() for part in raw.split(":") if part.strip()}
+
 
 def _format_line(r: SyncResult) -> str:
     label = {
@@ -17,12 +27,15 @@ def _format_line(r: SyncResult) -> str:
         "created": "created  ",
         "linked": "linked   ",
         "skipped-unchanged": "skipped  ",
+        "skipped-ignored": "skipped  ",
         "skipped-missing-host": "skipped  ",
         "error": "ERROR    ",
     }[r.status]
     name = r.name.ljust(20)
     if r.status == "error":
         return f"{label} {name} - {r.message or 'unknown error'}"
+    if r.status == "skipped-ignored":
+        return f"{label} {name} (ignored via {_IGNORE_ENV})"
     sha = r.sha or "       "
     suffix = ""
     if r.status == "skipped-unchanged":
@@ -88,8 +101,15 @@ def main(argv, cfg: Config) -> int:
 
     log_info(f"project_sync: mode={mode}, repos={len(repos)}")
 
+    ignored = _parse_ignore_list(os.environ.get(_IGNORE_ENV, "")) if mode == "bulk" else set()
+
     results = []
     for repo in repos:
+        if repo.name in ignored:
+            r = SyncResult(name=repo.name, status="skipped-ignored")
+            results.append(r)
+            print(_format_line(r))
+            continue
         try:
             r = sync_repo(cfg, repo, force=args.force)
         except OrganizerError as e:

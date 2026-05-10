@@ -191,6 +191,70 @@ def test_bulk_mode_two_repos(
     assert "project-sync: 2 projects" in log
 
 
+def test_ignore_env_skips_named_repos_in_bulk(
+    tmp_vault: Path, tmp_path: Path, monkeypatch, project_sync_main
+):
+    os.chmod(_CLAUDE_MOCK, 0o755)
+    monkeypatch.setenv("CLAUDE_MOCK_MODE", "project-sync")
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("PROJECT_SYNC_IGNORE", "skipme:also-skip")
+
+    parent = tmp_path / "Projects"
+    parent.mkdir()
+    _git_init_repo(parent / "keep", files={"README.md": "# keep\n"})
+    _git_init_repo(parent / "skipme", files={"README.md": "# skipme\n"})
+    _git_init_repo(parent / "also-skip", files={"README.md": "# also\n"})
+
+    _inject_local(
+        monkeypatch,
+        VAULT_DIR=str(tmp_vault),
+        WORKBENCH_DIR=str(tmp_path / "wb"),
+        VENV_DIR=str(tmp_path / "venv"),
+        BACKEND="claude",
+        AGENT_BIN=str(_CLAUDE_MOCK),
+    )
+
+    rc = project_sync_main([str(parent)])
+    assert rc == 0
+    assert (tmp_vault / "01_Projects" / "keep.md").exists()
+    assert not (tmp_vault / "01_Projects" / "skipme.md").exists()
+    assert not (tmp_vault / "01_Projects" / "also-skip.md").exists()
+
+    log = subprocess.run(
+        ["git", "-C", str(tmp_vault), "log", "--oneline"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    # Only `keep` was synced → single-repo commit message form.
+    assert "project-sync: keep @" in log
+    assert "skipme" not in log
+
+
+def test_ignore_env_does_not_apply_in_single_mode(
+    tmp_vault: Path, tmp_path: Path, monkeypatch, project_sync_main
+):
+    os.chmod(_CLAUDE_MOCK, 0o755)
+    monkeypatch.setenv("CLAUDE_MOCK_MODE", "project-sync")
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("PROJECT_SYNC_IGNORE", "delta")
+
+    repo = tmp_path / "Projects" / "delta"
+    _git_init_repo(repo, files={"README.md": "# delta\n"})
+
+    _inject_local(
+        monkeypatch,
+        VAULT_DIR=str(tmp_vault),
+        WORKBENCH_DIR=str(tmp_path / "wb"),
+        VENV_DIR=str(tmp_path / "venv"),
+        BACKEND="claude",
+        AGENT_BIN=str(_CLAUDE_MOCK),
+    )
+
+    rc = project_sync_main([str(repo)])
+    assert rc == 0
+    # Explicit single-target invocation overrides the env var.
+    assert (tmp_vault / "01_Projects" / "delta.md").exists()
+
+
 def test_invalid_target_returns_two(
     tmp_vault: Path, tmp_path: Path, monkeypatch, project_sync_main
 ):
