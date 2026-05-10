@@ -36,6 +36,8 @@
 | `03_Context/MyContext.md` | Read + **append-only to `## Active Ideas`** when you create a new Ideas note. All other content is human-owned. |
 | `03_Context/_pending-updates/` | Full write. |
 | `05_Archive/` | Write-only as a destination. Never edit existing archived files. |
+| `01_Projects/**/*.md` frontmatter `project_path` / `project_repo` / `last_synced` / `last_synced_commit` | **Read only.** Owned by `project_sync`. Preserve when appending; never modify. |
+| `01_Projects/**/*.md` content between `<!-- vault-sync:start -->` and `<!-- vault-sync:end -->` | **Read only.** Owned by `project_sync`. Do not modify either the markers or anything between them. Append elsewhere in the note. |
 
 ## 3. Routing (full procedure: see `03_Context/_routing-rules.md`)
 
@@ -135,6 +137,7 @@ old months out of `log.md` yourself.
 - Create any `index.md` other than `03_Context/MyContext.md`.
 - Use any tool other than Bash, Write, Read (you do not have network access).
 - Commit without a message (the orchestrator does the commit; you only edit files).
+- Modify any `<!-- vault-sync:* -->` marker, the content between them, or the `project_*` / `last_synced*` frontmatter fields in any `01_Projects/` note.
 
 ## 8. Failure protocol
 
@@ -151,3 +154,16 @@ See §6 above. The action verb must be one of: `ingest`, `lint-light`, `lint-ful
 The orchestrator slices everything older than the current month out of
 `log.md` and into `05_Archive/logs/YYYY-MM.md` at the start of each run. You
 should not modify `05_Archive/logs/`.
+
+## 11. project_sync integration
+
+Notes in `01_Projects/` may carry a snapshot block written by an out-of-band
+tool called `project_sync`, which the user runs manually from their shell.
+The block is bracketed by `<!-- vault-sync:start -->` and
+`<!-- vault-sync:end -->`. You may read it for context but never edit it;
+place any appended content outside the markers. The same applies to the
+`project_*` and `last_synced*` frontmatter fields.
+
+The existing "never create new notes in `01_Projects/`" rule is **not
+relaxed** — it constrains the nightly agent (you) specifically.
+`project_sync` runs as the user via a separate CLI and is not bound by it.
