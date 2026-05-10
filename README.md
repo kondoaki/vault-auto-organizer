@@ -161,14 +161,27 @@ When HEAD has not moved since the last sync, the agent is not invoked at all (`s
 
 ### Skipping specific repos
 
-Set `PROJECT_SYNC_IGNORE` to a colon-separated list of repository basenames. Repos with matching names are skipped in **bulk mode** (parent-directory invocation):
+Set `PROJECT_SYNC_IGNORE` to a colon-separated list of repository basenames. Repos with matching names are skipped in **bulk mode** (parent-directory invocation). Two ways to set it:
+
+**Persistent (recommended)** — write the value into `.env`, then re-run `install.sh`. The value is baked into `<vault>/scripts/lib/common/config_local.py` and applies to every subsequent run automatically.
 
 ```sh
-PROJECT_SYNC_IGNORE="scratch:dotfiles" \
+# in .env
+PROJECT_SYNC_IGNORE="_Vault:scratch:dotfiles"
+```
+
+```sh
+./install.sh --no-launchd-bootstrap
+```
+
+**One-off override** — export the env var for a single invocation. Whatever the env var contains takes precedence over the value in `config_local.py`:
+
+```sh
+PROJECT_SYNC_IGNORE="scratch" \
     "$VENV_DIR/bin/python" "$VAULT_PATH/scripts/project_sync.py" ~/Projects/
 ```
 
-Single-target invocation (`project_sync.py ~/Projects/scratch`) ignores the env var, so an explicitly named repo always syncs. The variable is also documented in [`.env.example`](.env.example); export it in your shell rc if you want it to persist across sessions.
+Single-target invocation (`project_sync.py ~/Projects/scratch`) ignores both — an explicitly named repo always syncs. Symlinks under the parent directory match by their link name, not the target's name; e.g. `~/Projects/_Vault → /path/to/Vault` is skipped by `PROJECT_SYNC_IGNORE="_Vault"`.
 
 ## Tests
 

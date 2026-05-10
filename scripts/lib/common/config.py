@@ -12,6 +12,7 @@ class Config:
     backend: str  # "claude" | "opencode"
     agent_bin: str
     check_recent: bool = False
+    project_sync_ignore: str = ""
 
 
 def load(*, check_recent: bool = False) -> Config:
@@ -29,6 +30,7 @@ def load(*, check_recent: bool = False) -> Config:
         backend=local.BACKEND,
         agent_bin=local.AGENT_BIN,
         check_recent=check_recent,
+        project_sync_ignore=getattr(local, "PROJECT_SYNC_IGNORE", ""),
     )
 
 

@@ -101,7 +101,15 @@ def main(argv, cfg: Config) -> int:
 
     log_info(f"project_sync: mode={mode}, repos={len(repos)}")
 
-    ignored = _parse_ignore_list(os.environ.get(_IGNORE_ENV, "")) if mode == "bulk" else set()
+    if mode == "bulk":
+        # env var, if set, overrides the install-rendered config value
+        # (one-off ad-hoc skips). Empty env var means "no override".
+        raw = os.environ.get(_IGNORE_ENV)
+        if raw is None:
+            raw = cfg.project_sync_ignore
+        ignored = _parse_ignore_list(raw)
+    else:
+        ignored = set()
 
     results = []
     for repo in repos:
