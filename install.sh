@@ -153,7 +153,9 @@ rsync -a --delete \
     --exclude '__pycache__' \
     --exclude '*.pyc' \
     "$REPO_ROOT/scripts/" "$VAULT_DIR/scripts/"
-chmod +x "$VAULT_DIR/scripts/daily_ingest.py" "$VAULT_DIR/scripts/weekly_lint.py"
+chmod +x "$VAULT_DIR/scripts/daily_ingest.py" \
+         "$VAULT_DIR/scripts/weekly_lint.py" \
+         "$VAULT_DIR/scripts/project_sync.py"
 
 # 10. Render lib/common/config_local.py from the template.
 mkdir -p "$VAULT_DIR/scripts/lib/common"
@@ -163,6 +165,7 @@ sed \
     -e "s|__VENV_DIR__|${VENV_DIR}|g" \
     -e "s|__BACKEND__|${BACKEND}|g" \
     -e "s|__AGENT_BIN__|${AGENT_BIN}|g" \
+    -e "s|__PROJECT_SYNC_IGNORE__|${PROJECT_SYNC_IGNORE:-}|g" \
     "$REPO_ROOT/templates/config.py.template" \
     > "$VAULT_DIR/scripts/lib/common/config_local.py"
 

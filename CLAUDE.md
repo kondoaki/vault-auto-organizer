@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Rules
 
 - **Public repo**: never commit `.env`, `scripts/lib/config.sh`, or rendered plists (gitignored). Don't paste real `VAULT_PATH`, `$HOME` paths, hostnames, note titles, or Vault contents into source, tests, fixtures, commit messages, or `templates/CLAUDE.md`. Tests must use `mktemp -d` synthetic Vaults — never point at a real Vault.
-- **Never `git push` without explicit user permission per push.** Prior approval doesn't carry over.
+- **Never `git push` without explicit user permission per push.** Prior approval doesn't carry over. **Never `git commit` on the main branch without explicit user permission per commit.**
 
 ## Commands
 
