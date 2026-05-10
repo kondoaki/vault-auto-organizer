@@ -8,6 +8,7 @@ See [SPEC.md](SPEC.md) for the design.
 
 - **Every night at 03:00** — reads `00_Inbox/`, routes each note to its destination (Resources/Projects/Ideas/Archive), runs a fast Lint on touched files, writes a per-night report.
 - **Every Sunday at 03:30** — runs the full 8-item Lint across the entire Vault.
+- **On demand** — `project_sync.py` snapshots external git repositories under `~/Projects/` into one note per repo in `01_Projects/`. See [Project sync](#project-sync) below.
 
 The agent runs inside an isolated git worktree at `~/Workspace/vault-workbench/` (outside the Vault, so the agent's edits don't interleave with any sync activity on the Vault itself), and its commits are merged back into the Vault via `git merge --no-ff`. Conflicts abort safely.
 
@@ -136,6 +137,38 @@ If you changed a plist template in `templates/plists/` in this repo, re-run `ins
    - `<vault>/log.md` has new entries.
    - `<vault>/Archive/daily-reports/<today>.md` exists.
    - `git -C <vault> log --oneline` shows a `merge daily-<today>` commit.
+
+## Project sync
+
+`project_sync.py` is an ad-hoc CLI (sibling of the nightly frames) that snapshots external git repositories into Vault notes under `01_Projects/`. It is **user-invoked only** — never scheduled, never on launchd. Design: [docs/specs/2026-05-10-project-sync-design.md](docs/specs/2026-05-10-project-sync-design.md).
+
+### Usage
+
+```sh
+# Sync a single repo (cwd must contain .git/, or pass an explicit path)
+"$VENV_DIR/bin/python" "$VAULT_PATH/scripts/project_sync.py" ~/Projects/foo
+
+# Sync every direct child of ~/Projects/ that is a git repo (depth 1, no recursion)
+"$VENV_DIR/bin/python" "$VAULT_PATH/scripts/project_sync.py" ~/Projects/
+
+# Re-run even when HEAD has not moved since the last sync
+"$VENV_DIR/bin/python" "$VAULT_PATH/scripts/project_sync.py" --force ~/Projects/foo
+```
+
+For each repo it writes/updates `<vault>/01_Projects/<name>.md` (or `<name>/<name>.md` if the folder already exists). Only the region between `<!-- vault-sync:start -->` and `<!-- vault-sync:end -->` is rewritten on each run; everything else in the note is preserved verbatim. Frontmatter fields `project_path`, `project_repo`, `last_synced`, `last_synced_commit` are owned by `project_sync` and refreshed deterministically by Python after the agent finishes.
+
+When HEAD has not moved since the last sync, the agent is not invoked at all (`skipped (unchanged since last sync)`), so a `project_sync.py ~/Projects/` over many idle repos is cheap.
+
+### Skipping specific repos
+
+Set `PROJECT_SYNC_IGNORE` to a colon-separated list of repository basenames. Repos with matching names are skipped in **bulk mode** (parent-directory invocation):
+
+```sh
+PROJECT_SYNC_IGNORE="scratch:dotfiles" \
+    "$VENV_DIR/bin/python" "$VAULT_PATH/scripts/project_sync.py" ~/Projects/
+```
+
+Single-target invocation (`project_sync.py ~/Projects/scratch`) ignores the env var, so an explicitly named repo always syncs. The variable is also documented in [`.env.example`](.env.example); export it in your shell rc if you want it to persist across sessions.
 
 ## Tests
 
